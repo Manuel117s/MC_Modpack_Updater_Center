@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from datetime import datetime
 from bson import ObjectId
 from database import get_db
-from schemas import UserCreate, UserOut, LoginRequest, TokenResponse
+from schemas import UserCreate, UserOut, LoginRequest, TokenResponse, HandshakeRequest, HandshakeResponse
 from auth_utils import hash_password, verify_password, create_access_token
 
 router = APIRouter()
@@ -42,3 +42,12 @@ async def login(body: LoginRequest):
 
     token = create_access_token(str(user["_id"]))
     return TokenResponse(access_token=token)
+
+@router.post("/handshake", response_model=HandshakeResponse)
+async def process_handshake(data: HandshakeRequest):
+    print(f"Recived from react: {data.message}")
+
+    return HandshakeResponse(
+        status="OK",
+        reply="Handshake succesfull!"
+    )

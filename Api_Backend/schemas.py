@@ -151,3 +151,12 @@ class DashboardModpack(BaseModel):
     latest_released_at: Optional[datetime]
     role: str                          # "owner" | "admin" | "editor" | "viewer"
     updated_at: datetime
+
+# ── Frondend connection ────────────────────────────────────────────────────────
+
+class HandshakeRequest(BaseModel):
+    message: str
+
+class HandshakeResponse(BaseModel):
+    status: str
+    reply: str

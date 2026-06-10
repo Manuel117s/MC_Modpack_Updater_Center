@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from database import connect_db, close_db
 from routers import auth, modpacks, releases, news, collaborators
-
+from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -16,6 +16,14 @@ app = FastAPI(
     description="API for managing modpack updates across games",
     version="1.0.0",
     lifespan=lifespan,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000" ,"http://localhost:5173"],
+    allow_credentials = True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(auth.router,          prefix="/auth",          tags=["Auth"])
