@@ -47,7 +47,7 @@ function Dashboard() {
   const fetchModpacks = async () => {
     try {
       setLoading(true);
-      const data = await api.get('/modpacks/dashboard');
+      const { data } = await api.get('/modpacks/dashboard');
       setModpacks(data);
       setError(null);
     } catch (err) {
