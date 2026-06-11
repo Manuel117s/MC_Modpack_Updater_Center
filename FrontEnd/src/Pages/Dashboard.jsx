@@ -47,7 +47,8 @@ function Dashboard() {
   const fetchModpacks = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get('/modpacks/dashboard');
+      // Forzamos el paso por el bloque /api/ de Nginx
+      const { data } = await api.get('/api/dashboard'); 
       setModpacks(data);
       setError(null);
     } catch (err) {
