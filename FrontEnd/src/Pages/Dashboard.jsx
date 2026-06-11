@@ -45,18 +45,20 @@ function Dashboard() {
   });
 
   const fetchModpacks = async () => {
-    try {
-      setLoading(true);
-      const { data } = await api.get('/modpacks/dashboard');
-      setModpacks(data);
-      setError(null);
-    } catch (err) {
-      console.error(err);
-      setError(err.message || 'Failed to load modpacks');
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+    console.log("Intentando llamar a: /modpacks/dashboard"); // <-- Agrega esto
+    const data = await api.get('/modpacks/dashboard');
+    console.log("Datos recibidos:", data); // <-- Agrega esto
+    setModpacks(data);
+    setError(null);
+  } catch (err) {
+    console.error("Error en Dashboard:", err);
+    setError(err.message || 'Failed to load modpacks');
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchModpacks();
