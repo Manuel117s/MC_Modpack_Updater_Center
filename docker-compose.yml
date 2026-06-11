@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./api_backend
+    container_name: fastapi_backend
+    restart: always
+    # Docker Compose cargará automáticamente el archivo .env de la carpeta backend
+    # e inyectará todas las variables dentro del contenedor en tiempo de ejecución.
+    env_file:
+      - ./api_backend/.env
+
+  frontend:
+    build:
+      context: ./frontend
+      # Usamos 'args' para pasarle la variable al Dockerfile de React durante la construcción
+      args:
+        # Como configuramos Nginx como proxy inverso, la URL de tu API para producción 
+        # será simplemente la ruta relativa '/api'
+        - VITE_API_URL=/api
+    container_name: react_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
