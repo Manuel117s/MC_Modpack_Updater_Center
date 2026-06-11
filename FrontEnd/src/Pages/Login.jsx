@@ -2,15 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/authContext';
 
-function SignIn() {
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-  });
+function Login() {
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [localError, setLocalError] = useState(null);
-  const { register, isAuthenticated } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,10 +24,10 @@ function SignIn() {
     setIsLoading(true);
     setLocalError(null);
     try {
-      await register(formData.username, formData.email, formData.password);
+      await login(formData.email, formData.password);
       navigate('/dashboard');
     } catch (err) {
-      setLocalError(err.message || 'Registration failed');
+      setLocalError(err.message || 'Invalid credentials');
     } finally {
       setIsLoading(false);
     }
@@ -40,8 +36,8 @@ function SignIn() {
   return (
     <div className="auth-page">
       <form className="auth-card animate-in" onSubmit={handleSubmit}>
-        <h2>Create Account</h2>
-        <p className="subtitle">Start managing your modpacks today</p>
+        <h2>Welcome back</h2>
+        <p className="subtitle">Log in to your CurseModpack account</p>
 
         {localError && (
           <div className="badge badge-red" style={{ display: 'block', width: '100%', padding: '0.65rem', marginBottom: '1.2rem', textAlign: 'center', borderRadius: 'var(--radius-md)', fontSize: '0.85rem' }}>
@@ -50,26 +46,10 @@ function SignIn() {
         )}
 
         <div className="form-group">
-          <label htmlFor="register-username">Username</label>
-          <input
-            type="text"
-            id="register-username"
-            name="username"
-            placeholder="CraftMaster42"
-            value={formData.username}
-            onChange={handleChange}
-            required
-            minLength={3}
-            maxLength={32}
-            autoComplete="username"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="register-email">Email</label>
+          <label htmlFor="login-email">Email</label>
           <input
             type="email"
-            id="register-email"
+            id="login-email"
             name="email"
             placeholder="you@example.com"
             value={formData.email}
@@ -80,31 +60,30 @@ function SignIn() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="register-password">Password</label>
+          <label htmlFor="login-password">Password</label>
           <input
             type="password"
-            id="register-password"
+            id="login-password"
             name="password"
-            placeholder="Min. 8 characters"
+            placeholder="••••••••"
             value={formData.password}
             onChange={handleChange}
             required
-            minLength={8}
-            autoComplete="new-password"
+            autoComplete="current-password"
           />
         </div>
 
         <button type="submit" className="btn btn-primary" disabled={isLoading}>
-          {isLoading ? 'Creating account…' : 'Create Account'}
+          {isLoading ? 'Signing in…' : 'Sign In'}
         </button>
 
         <p className="auth-footer">
-          Already have an account?{' '}
-          <Link to="/login">Log in</Link>
+          Don&apos;t have an account?{' '}
+          <Link to="/signin">Create one</Link>
         </p>
       </form>
     </div>
   );
 }
 
-export default SignIn;
+export default Login;

@@ -1,12 +1,11 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from datetime import datetime
 from bson import ObjectId
 from database import get_db
 from schemas import UserCreate, UserOut, LoginRequest, TokenResponse, HandshakeRequest, HandshakeResponse
-from auth_utils import hash_password, verify_password, create_access_token
+from auth_utils import hash_password, verify_password, create_access_token, get_current_user
 
 router = APIRouter()
-
 
 @router.post("/register", response_model=UserOut, status_code=201)
 async def register(body: UserCreate):
@@ -50,4 +49,18 @@ async def process_handshake(data: HandshakeRequest):
     return HandshakeResponse(
         status="OK",
         reply="Handshake succesfull!"
+    )
+
+@router.get("/me", response_model=UserOut)
+async def get_me(user_id: str = Depends(get_current_user)):
+    db = get_db()
+    user = await db.users.find_one({"_id": ObjectId(user_id)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return UserOut(
+        id=str(user["_id"]),
+        username=user["username"],
+        email=user["email"],
+        avatar_url=user.get("avatar_url"),
+        created_at=user["created_at"],
     )

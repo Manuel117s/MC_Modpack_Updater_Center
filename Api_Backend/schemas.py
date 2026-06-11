@@ -113,6 +113,11 @@ class NewsCreate(BaseModel):
     body: str
 
 
+class NewsUpdate(BaseModel):
+    title: Optional[str] = Field(None, min_length=1, max_length=200)
+    body: Optional[str] = None
+
+
 class NewsOut(BaseModel):
     id: str
     modpack_id: str
@@ -120,6 +125,7 @@ class NewsOut(BaseModel):
     body: str
     author_id: str
     created_at: datetime
+    updated_at: Optional[datetime] = None
 
 
 # ── Collaborators ─────────────────────────────────────────────────────────────

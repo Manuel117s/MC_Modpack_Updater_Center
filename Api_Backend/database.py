@@ -1,16 +1,25 @@
 import os
+from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 
-client: AsyncIOMotorClient = None
+load_dotenv()
+
+client: AsyncIOMotorClient | None = None
 db = None
 
 
 async def connect_db():
     global client, db
-    mongo_url = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
+
+    mongo_url = os.getenv("MONGO_URI")
+    db_name = os.getenv("DB_NAME")
+
+    if not mongo_url or not db_name:
+        raise ValueError("ENVIROMENT ERROR: MONGO_URI and/or DB_NAME are empty or unexisting")
+    
     client = AsyncIOMotorClient(mongo_url)
-    db = client[os.getenv("DB_NAME", "modpack_manager")]
-    print(f"Connected to MongoDB: {mongo_url}")
+    db = client[db_name]
+    print(f"Connected to MongoDB database {db_name}")
 
 
 async def close_db():

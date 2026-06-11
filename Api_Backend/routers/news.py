@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from datetime import datetime
 from bson import ObjectId
 from database import get_db
-from schemas import NewsCreate, NewsOut
+from schemas import NewsCreate, NewsOut, NewsUpdate
 from auth_utils import get_current_user
 from typing import List
 
@@ -15,7 +15,7 @@ async def list_news(modpack_id: str, user_id: str = Depends(get_current_user)):
     await _assert_access(db, modpack_id, user_id)
     posts = await db.news.find(
         {"modpack_id": ObjectId(modpack_id)}
-    ).sort("created_at", -1).to_list(length=50)
+    ).sort([("updated_at", -1), ("created_at", -1)]).to_list(length=50)
     return [_news_out(p) for p in posts]
 
 
@@ -29,9 +29,34 @@ async def create_news(modpack_id: str, body: NewsCreate, user_id: str = Depends(
         "body":       body.body,
         "author_id":  ObjectId(user_id),
         "created_at": datetime.utcnow(),
+        "updated_at": datetime.utcnow(),
     }
     result = await db.news.insert_one(doc)
     doc["_id"] = result.inserted_id
+    return _news_out(doc)
+
+
+@router.patch("/{modpack_id}/news/{news_id}", response_model=NewsOut)
+async def update_news(modpack_id: str, news_id: str, body: NewsUpdate, user_id: str = Depends(get_current_user)):
+    db = get_db()
+    await _assert_editor(db, modpack_id, user_id)
+
+    updates = {k: v for k, v in body.dict().items() if v is not None}
+    if not updates:
+        raise HTTPException(400, "No updates provided")
+    updates["updated_at"] = datetime.utcnow()
+
+    result = await db.news.update_one(
+        {
+            "_id": ObjectId(news_id),
+            "modpack_id": ObjectId(modpack_id),
+        },
+        {"$set": updates},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(404, "News post not found")
+
+    doc = await db.news.find_one({"_id": ObjectId(news_id), "modpack_id": ObjectId(modpack_id)})
     return _news_out(doc)
 
 
@@ -87,4 +112,5 @@ def _news_out(doc) -> NewsOut:
         body=doc["body"],
         author_id=str(doc["author_id"]),
         created_at=doc["created_at"],
+        updated_at=doc.get("updated_at"),
     )
